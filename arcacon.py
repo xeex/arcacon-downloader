@@ -63,6 +63,7 @@ for num, i in enumerate(icons):
                 outputs={f"{num}.gif": "-y -i palette.png -lavfi paletteuse"},
             )  # ffmpeg -i temp.mp4 -y -i palette.png -lavfi paletteuse temp.gif
         ff.run()
+        cap.release()
         os.remove("temp.mp4")
         os.remove("palette.png")
     else:
