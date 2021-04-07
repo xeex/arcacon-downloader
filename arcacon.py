@@ -44,28 +44,22 @@ for num, i in enumerate(icons):
         # For each icon, save the frame palette and use this palette to generate the gif
         # This removes the "blotchy" effects you would get from converting mp4 to gif otherwise
 
-        ff = ffmpy.FFmpeg(
-            inputs={"temp.mp4": None}, outputs={"palette.png": "-y -vf palettegen"}
-        )  # ffmpeg -i temp.mp4 -y -vf palettegen palette.png
-        ff.run()
-
         # GIFs support a maximum frame rate of 50 fps.
         # If temp.mp4 exceeds 50, then we limit it.
         cap = VideoCapture("temp.mp4")
         if cap.get(CAP_PROP_FPS) > 50:
             ff = ffmpy.FFmpeg(
                 inputs={"temp.mp4": None},
-                outputs={f"{num}.gif": "-y -i palette.png -lavfi paletteuse -r 50"},
-            )  # ffmpeg -i temp.mp4 -y -i palette.png -lavfi paletteuse -r 50 temp.gif
+                outputs={f"{num}.gif": '-filter_complex "[0:v] split [a][b];[a] palettegen [p];[b][p] paletteuse" -r 50'},
+            )
         else:
             ff = ffmpy.FFmpeg(
                 inputs={"temp.mp4": None},
-                outputs={f"{num}.gif": "-y -i palette.png -lavfi paletteuse"},
-            )  # ffmpeg -i temp.mp4 -y -i palette.png -lavfi paletteuse temp.gif
+                outputs={f"{num}.gif": '-filter_complex "[0:v] split [a][b];[a] palettegen [p];[b][p] paletteuse"'},
+            )
         ff.run()
         cap.release()
         os.remove("temp.mp4")
-        os.remove("palette.png")
     else:
         # Save the file as is
         ext = icon_url.split(".")[-1]
