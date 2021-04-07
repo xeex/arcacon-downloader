@@ -11,6 +11,11 @@ parser.add_argument(
     help="The ID of the Arcacon you want to download. This will most likely be a 4-digit number.",
     type=int,
 )
+parser.add_argument(
+    "-s", "--single_palette",
+    help="Use a single 256-color palette to display the colors in the GIF file instead of using a palette for each frame. This will reduce the file size, but may be low quality if the GIF file has many colors and/or frames.",
+    action="store_true"
+)
 args = parser.parse_args()
 
 URL = f"https://arca.live/e/{args.arcacon_id}"
@@ -44,18 +49,23 @@ for num, i in enumerate(icons):
         # For each icon, save the frame palette and use this palette to generate the gif
         # This removes the "blotchy" effects you would get from converting mp4 to gif otherwise
 
+        if args.single_palette:
+            ffmpeg_arg = '-filter_complex "[0:v] split [a][b];[a] palettegen [p];[b][p] paletteuse"'
+        else:
+            ffmpeg_arg = '-filter_complex "[0:v] split [a][b];[a] palettegen=stats_mode=single [p];[b][p] paletteuse=new=1"'
+
         # GIFs support a maximum frame rate of 50 fps.
         # If temp.mp4 exceeds 50, then we limit it.
         cap = VideoCapture("temp.mp4")
         if cap.get(CAP_PROP_FPS) > 50:
             ff = ffmpy.FFmpeg(
                 inputs={"temp.mp4": None},
-                outputs={f"{num}.gif": '-filter_complex "[0:v] split [a][b];[a] palettegen [p];[b][p] paletteuse" -r 50'},
+                outputs={f"{num}.gif": f'{ffmpeg_arg} -r 50'},
             )
         else:
             ff = ffmpy.FFmpeg(
                 inputs={"temp.mp4": None},
-                outputs={f"{num}.gif": '-filter_complex "[0:v] split [a][b];[a] palettegen [p];[b][p] paletteuse"'},
+                outputs={f"{num}.gif": ffmpeg_arg},
             )
         ff.run()
         cap.release()
