@@ -24,7 +24,7 @@ page = requests.get(URL)
 soup = BeautifulSoup(page.text, "html.parser")
 body = soup.find("div", {"class": "article-body"})
 icons = body.find_all(loading="lazy")
-title = f"[{args.arcacon_id}] {soup.title.text}"
+title = f"[{args.arcacon_id}] {soup.title.text}".replace('/', ' ')
 
 if not os.path.exists(title):
     os.mkdir(title)

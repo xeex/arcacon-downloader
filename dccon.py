@@ -28,7 +28,7 @@ details = loads(
     ).text
 )
 
-DIR_NAME = f"({args.dccon_id}) {details['info']['title']}"
+DIR_NAME = f"({args.dccon_id}) {details['info']['title']}".replace('/', ' ')
 
 if not os.path.exists(DIR_NAME):
     os.mkdir(DIR_NAME)
